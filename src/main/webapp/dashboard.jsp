@@ -1,45 +1,64 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pahana Edu - Dashboard</title>
+    <title>Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #e9ecef; color: #333; margin: 20px; }
-        .container { max-width: 960px; margin: 0 auto; background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-        h1, h2 { color: #007bff; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; }
+        h2 { color: #007bff; }
         p { line-height: 1.6; }
-        .user-info { font-weight: bold; }
-        .logout-link { display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px; }
-        .logout-link:hover { background-color: #c82333; }
+        .logout-link { float: right; margin-top: 10px; }
+        .logout-link a { color: #dc3545; text-decoration: none; font-weight: bold; }
+        .logout-link a:hover { text-decoration: underline; }
+        .role-content { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #e9ecef; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Pahana Edu Dashboard!</h1>
+        <div class="logout-link">
+            <a href="${pageContext.request.contextPath}/logout">Logout</a>
+        </div>
+        <h1>Welcome to Your Dashboard!</h1>
 
-        <%-- Check if user is logged in (session attribute exists) --%>
-        <%
-            com.pahanaedu.model.User loggedInUser = (com.pahanaedu.model.User) session.getAttribute("loggedInUser");
-            if (loggedInUser == null) {
-                // If not logged in, redirect to login page
-                response.sendRedirect(request.getContextPath() + "/login.jsp");
-                return; // Stop further processing of this JSP
-            }
-        %>
+        <%-- Check if user is logged in --%>
+        <c:if test="${empty sessionScope.loggedInUser}">
+            <p style="color: red;">You are not logged in. Please <a href="${pageContext.request.contextPath}/login">login here</a>.</p>
+        </c:if>
 
-        <p class="user-info">Logged in as: <%= loggedInUser.getUsername() %> (Role: <%= loggedInUser.getRole() %>)</p>
-        <p>This is your main dashboard. From here, you can navigate to different sections of the application.</p>
+        <c:if test="${not empty sessionScope.loggedInUser}">
+            <h2>Hello, ${sessionScope.loggedInUser.username}!</h2>
+            <p>Your role: <strong>${sessionScope.userRole}</strong></p>
 
-        <h2>Navigation</h2>
-        <ul>
-            <li><a href="<%= request.getContextPath() %>/customers">Manage Customers (Coming Soon)</a></li>
-            <li><a href="<%= request.getContextPath() %>/items">Manage Items (Coming Soon)</a></li>
-            <li><a href="<%= request.getContextPath() %>/billing">Manage Billing (Coming Soon)</a></li>
-            <li><a href="<%= request.getContextPath() %>/help.jsp">Help Section (Coming Soon)</a></li>
-        </ul>
-
-        <a href="logout" class="logout-link">Logout</a>
+            <div class="role-content">
+                <c:choose>
+                    <c:when test="${sessionScope.userRole == 'admin'}">
+                        <h3>Admin Privileges</h3>
+                        <p>As an **administrator**, you have full access to manage users, customers, and inventory items.</p>
+                        <ul>
+                            <li><a href="${pageContext.request.contextPath}/manageUsers">Manage Users</a> (Coming Soon!)</li>
+                            <li><a href="${pageContext.request.contextPath}/manageCustomers">Manage Customers</a> (Coming Soon!)</li>
+                            <li><a href="${pageContext.request.contextPath}/manageItems">Manage Inventory Items</a> (Coming Soon!)</li>
+                        </ul>
+                    </c:when>
+                    <c:when test="${sessionScope.userRole == 'user'}">
+                        <h3>User View</h3>
+                        <p>As a **regular user**, you can view your specific information and perform general tasks.</p>
+                        <ul>
+                            <li><a href="${pageContext.request.contextPath}/viewProfile">View Profile</a> (Coming Soon!)</li>
+                            <li><a href="${pageContext.request.contextPath}/viewInvoices">View Invoices</a> (Coming Soon!)</li>
+                        </ul>
+                    </c:when>
+                    <c:otherwise>
+                        <h3>Unknown Role</h3>
+                        <p>Your role is not recognized. Please contact support.</p>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </c:if>
     </div>
 </body>
 </html>
